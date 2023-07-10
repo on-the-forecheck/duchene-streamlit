@@ -91,7 +91,7 @@ with st.spinner("Downloading data from database..."):
     pbp = pbp_sql(
         seasons,
         events = 'shots',
-        player = players,
+        players = players,
         strengths = strength_states,
         teammates=teammates,
         opposition=opposition,
