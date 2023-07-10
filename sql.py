@@ -21,7 +21,7 @@ def sql_engine():
 
 engine = sql_engine()
 
-@st.cache_data(ttl=600)
+@st.cache_data(ttl=600, show_spinner = False)
 def get_players(years, team):
 
     seasons = [f'{year}{year+1}' for year in years]
@@ -46,7 +46,7 @@ def get_players(years, team):
     return players
 
 ## Read pbp functions
-@st.cache_data(ttl=600)
+@st.cache_data(ttl=600, show_spinner = False)
 def pbp_sql(years, events = None, teammates = True, opposition = True, engine = engine):
     '''
     Function to read pbp data from my SQL database
@@ -237,7 +237,7 @@ def pbp_sql(years, events = None, teammates = True, opposition = True, engine = 
     return pbp
 
 ## Read stats function
-@st.cache_data(ttl=600)
+@st.cache_data(ttl=600, show_spinner = False)
 def stats_sql(years, level = 'game', strengths = ['5v5'], players = [], teammates = False, opposition = False, score = False, engine = engine):
     '''
     Function to read stats data from my SQL database
@@ -488,7 +488,7 @@ def stats_sql(years, level = 'game', strengths = ['5v5'], players = [], teammate
     return stats
 
 ## Read lines function
-@st.cache_data(ttl=600)
+@st.cache_data(ttl=600, show_spinner = False)
 def lines_sql(years, line_type, strengths = ['5v5'], player = False, level = 'game', teammates = False, opposition = False, score = False, engine = engine):
     '''
     Function to read lines data from my SQL database
@@ -705,7 +705,7 @@ def lines_sql(years, line_type, strengths = ['5v5'], player = False, level = 'ga
     return lines
     
 ## Read teams functions
-@st.cache_data(ttl=600)
+@st.cache_data(ttl=600, show_spinner = False)
 def teams_sql(years, level = 'game', strengths = True, score = False, engine = engine):
     '''
     Function to read lines data from my SQL database
