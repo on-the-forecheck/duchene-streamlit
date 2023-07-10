@@ -37,6 +37,8 @@ from helper_functions import (
     calc_pims,
     get_averages,
     prep_lines,
+    prep_pbp,
+    prep_stats
 )
 from plot_functions import zscore_jitter, lines_scatter
 
@@ -69,8 +71,8 @@ with st.spinner("Downloading list of players from database..."):
 with st.sidebar:
     players = st.multiselect(players_label, players, default='MATT.DUCHENE')
 
-    toi_min = st.slider(
-        "SELECT TIME-ON-ICE THRESHOLD", min_value=None, max_value=None, value=30, step=1
+    sessions = st.multiselect(
+        "SELECT REGULAR SEASON OR PLAYOFFS", ['R', 'P'], default = ['R']
     )
 
 teammates = False
@@ -78,9 +80,10 @@ opposition = False
 
 with st.spinner("Downloading data from database..."):
 
-    season_stats = stats_sql(
+    game_stats = stats_sql(
         years=seasons,
         level="game",
+        sessions = sessions,
         strengths=strength_states,
         players=players,
         teammates=teammates,
@@ -89,6 +92,7 @@ with st.spinner("Downloading data from database..."):
 
     pbp = pbp_sql(
         seasons,
+        sessions = sessions,
         events = 'shots',
         players = players,
         strengths = strength_states,
@@ -96,6 +100,10 @@ with st.spinner("Downloading data from database..."):
         opposition=opposition,
     )
 
+game_stats = prep_stats(game_stats)
+
+pbp = prep_pbp(pbp)
+
 st.dataframe(pbp)
 
-st.dataframe(season_stats)
+st.dataframe(game_stats)

@@ -196,3 +196,54 @@ def get_averages(data, x_values, y_values, team, weights="toi_min", level="NHL")
     x_avg = np.average(df[x_values].fillna(0), weights=df[weights])
 
     return x_avg, y_avg
+
+
+def prep_pbp(pbp):
+
+    df = pbp.copy()
+
+    pp_list = ['5v4', '5v3', '4v3']
+    sh_list = ['4v5', '3v5', '3v4']
+
+    conds = [df.strength_state.isin(pp_list),
+    df.strength_state.isin(sh_list),
+    df.strength_state == '5v5',
+    ]
+
+    values = ['POWERPLAY', 'SHORTHANDED', '5v5']
+
+    df.strength_state = np.select(conds, values, df.strength_state)
+
+    sort_cols = ['game_date', 'event_index']
+
+    df = df.sort_values(by = sort_cols).reset_index(drop = True)
+
+    return df
+
+def prep_stats(stats):
+
+    df = stats.copy()
+
+    pp_list = ['5v4', '5v3', '4v3']
+    sh_list = ['4v5', '3v5', '3v4']
+
+    conds = [df.strength_state.isin(pp_list),
+    df.strength_state.isin(sh_list),
+    df.strength_state == '5v5',
+    ]
+
+    values = ['POWERPLAY', 'SHORTHANDED', '5v5']
+
+    df.strength_state = np.select(conds, values, df.strength_state)
+
+    group_list = ['season', 'session', 'game_id', 'game_date', 'player', 'player_id', 'position', 'team', 'opp_team', 'strength_state']
+
+    agg_stats = {x: 'sum' for x in df.columns if x not in group_list}
+
+    df = df.groupby(group_list, as_index = False).agg(agg_stats)
+
+    sort_cols = ['game_date', 'strength_state']
+
+    df = df.sort_values(by = sort_cols).reset_index(drop = True)
+
+    return df

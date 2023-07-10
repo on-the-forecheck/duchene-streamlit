@@ -49,7 +49,7 @@ def get_players(years, team):
 
 ## Read pbp functions
 @st.cache_data(ttl=600, show_spinner=False)
-def pbp_sql(years, events=None, players = [], strengths = ['5v5'], teammates=True, opposition=True, engine=engine):
+def pbp_sql(years, events=None, players = [], strengths = ['5v5'], sessions = ['R'], teammates=True, opposition=True, engine=engine):
     """
     Function to read pbp data from my SQL database
     Can be either current or historical stats
@@ -226,6 +226,7 @@ def pbp_sql(years, events=None, players = [], strengths = ['5v5'], teammates=Tru
                             WHERE season = {year}{year + 1}
                             AND strength_state IN ({', '.join(f"'{strength}'" for strength in strengths)})
                             AND event_type IN {str(events).replace('[', '(').replace(']', ')')}
+                            AND session IN ({', '.join(f"'{session}'" for session in sessions)})
                             ORDER BY game_date, game_id, event_index"""
 
         else:
@@ -237,6 +238,7 @@ def pbp_sql(years, events=None, players = [], strengths = ['5v5'], teammates=Tru
                             AND strength_state IN ({', '.join(f"'{strength}'" for strength in strengths)})
                             AND event_player_1 IN ({', '.join(f"'{player}'" for player in players)})
                             AND event_type IN {str(events).replace('[', '(').replace(']', ')')}
+                            AND session IN ({', '.join(f"'{session}'" for session in sessions)})
                             ORDER BY game_date, game_id, event_index"""
 
 
@@ -257,8 +259,9 @@ def pbp_sql(years, events=None, players = [], strengths = ['5v5'], teammates=Tru
 def stats_sql(
     years,
     level="game",
-    strengths=["5v5"],
     players=[],
+    strengths=["5v5"],
+    sessions = ['R'],
     teammates=False,
     opposition=False,
     score=False,
@@ -506,6 +509,7 @@ def stats_sql(
                             WHERE season = {year}{year + 1}
                             AND strength_state IN ({', '.join(f"'{strength}'" for strength in strengths)})
                             AND player_id IN ({', '.join(f"'{player}'" for player in players)})
+                            AND session IN ({', '.join(f"'{session}'" for session in sessions)})
                             GROUP BY {', '.join(group_cols)}
                             ORDER BY {', '.join(order_sql)}"""
 
@@ -515,6 +519,7 @@ def stats_sql(
                             FROM {table}
                             WHERE season = {year}{year + 1}
                             AND strength_state IN ({', '.join(f"'{strength}'" for strength in strengths)})
+                            AND session IN ({', '.join(f"'{session}'" for session in sessions)})
                             GROUP BY {', '.join(group_cols)}
                             ORDER BY {', '.join(order_sql)}"""
 
