@@ -344,7 +344,7 @@ TOOLS = "hover,crosshair,pan,wheel_zoom,zoom_in,zoom_out,box_zoom,undo,redo,rese
 
 player_name = player.replace('..', ' ').replace('.', ' ')
 
-title_text = f'{player} {season} 5v5 LINE COMBINATIONS & PERFORMANCE'
+title_text = f'{player_name} {season} 5v5 LINE COMBINATIONS & PERFORMANCE'
 
 if size_col != 'EVENLY SIZED':
 
