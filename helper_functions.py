@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 
+
 ## Calculating on percentages
 def calc_percentages(df):
     stats_for = ["xgf", "cf", "ff", "gf", "msf", "sf", "ozfw", "nzfw", "dzfw", "hf"]
@@ -129,12 +130,12 @@ def calc_faceoffs(df):
 
 
 def calc_pims(df):
-    
     df["ipimt"] = (df.ipent2 * 2) + (df.pent4 * 4) + (df.pent5 * 5) + (df.pent10 * 10)
 
     df["ipimd"] = (df.ipend2 * 2) + (df.pend4 * 4) + (df.pend5 * 5) + (df.pend10 * 10)
 
     return df
+
 
 def prep_lines(lines, toi_min):
     lines = lines.loc[lines.toi >= toi_min * 60].reset_index(drop=True)
@@ -154,16 +155,14 @@ def prep_lines(lines, toi_min):
         and "mean" not in x
         and "std" not in x
         and "zscore" not in x
-        ]
+    ]
 
     group_list = ["season", "session", "strength_state"]
 
     concat_list = [lines]
 
     for stat in agg_stats:
-
         if f"{stat}_zscore" in lines.columns:
-
             continue
 
         zscore_calc = lambda x: (x - x.mean()) / x.std()
@@ -172,7 +171,7 @@ def prep_lines(lines, toi_min):
             lines.groupby(group_list, as_index=False)[stat]
             .transform(zscore_calc)
             .rename(index=f"{stat}_zscore")
-            )
+        )
 
         concat_list.append(zscore)
 
@@ -182,22 +181,18 @@ def prep_lines(lines, toi_min):
     return lines
 
 
-
 ## Get averages
-def get_averages(data, x_values, y_values, team, weights = 'toi_min', level = 'NHL'):
-
-    if level == 'team':
-    
+def get_averages(data, x_values, y_values, team, weights="toi_min", level="NHL"):
+    if level == "team":
         conds = np.logical_and.reduce([data.team == team])
 
         df = data.loc[conds].copy()
 
-    elif level == 'NHL':
-
+    elif level == "NHL":
         df = data.copy()
-    
-    y_avg = np.average(df[y_values].fillna(0), weights = df[weights])
-    
-    x_avg = np.average(df[x_values].fillna(0), weights = df[weights])
-    
+
+    y_avg = np.average(df[y_values].fillna(0), weights=df[weights])
+
+    x_avg = np.average(df[x_values].fillna(0), weights=df[weights])
+
     return x_avg, y_avg

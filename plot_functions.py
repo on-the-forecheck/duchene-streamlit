@@ -18,16 +18,26 @@ from bokeh.transform import factor_cmap, jitter
 from bokeh.layouts import gridplot, column
 
 import sys
+
 sys.path.append("duchene-streamlit")
 from info import NHL_COLORS, team_codes, label_dict
-from helper_functions import (calc_per60, calc_zones, calc_percentages, calc_pims, get_averages, prep_lines)
+from helper_functions import (
+    calc_per60,
+    calc_zones,
+    calc_percentages,
+    calc_pims,
+    get_averages,
+    prep_lines,
+)
 
-plot_colors = {'dark_gray': '#36454F',
-                       'light_gray': '#D3D3D3',
-                       'medium_gray': '#808080'}
+plot_colors = {
+    "dark_gray": "#36454F",
+    "light_gray": "#D3D3D3",
+    "medium_gray": "#808080",
+}
+
 
 def zscore_jitter(lines, player, team, season, toi_min, size_col):
-
     sessions = ["R"]
 
     conds = np.logical_and.reduce(
@@ -41,9 +51,11 @@ def zscore_jitter(lines, player, team, season, toi_min, size_col):
         lines.loc[conds].sort_values(by="toi", ascending=False).reset_index(drop=True)
     )
 
-    plot_data["size_col"] = (plot_data.toi_min - plot_data.toi_min.min()) / (
-        plot_data.toi_min.max() - plot_data.toi_min.min()
-    ) * 100
+    plot_data["size_col"] = (
+        (plot_data.toi_min - plot_data.toi_min.min())
+        / (plot_data.toi_min.max() - plot_data.toi_min.min())
+        * 100
+    )
 
     id_vars = [
         "season",
@@ -86,8 +98,12 @@ def zscore_jitter(lines, player, team, season, toi_min, size_col):
     )
 
     conds = [
-        np.logical_and(plot_data.team != team, ~plot_data.forwards_id.str.contains(player)),
-        np.logical_and(plot_data.team == team, ~plot_data.forwards_id.str.contains(player)),
+        np.logical_and(
+            plot_data.team != team, ~plot_data.forwards_id.str.contains(player)
+        ),
+        np.logical_and(
+            plot_data.team == team, ~plot_data.forwards_id.str.contains(player)
+        ),
         plot_data.forwards_id.str.contains(player),
     ]
 
@@ -109,20 +125,20 @@ def zscore_jitter(lines, player, team, season, toi_min, size_col):
     xtick_labels = dict(zip(value_vars, xtick_labels))
 
     for old_name, new_name in xtick_labels.items():
-
-        plot_data.variable = np.where(plot_data.variable == old_name, new_name, plot_data.variable)
+        plot_data.variable = np.where(
+            plot_data.variable == old_name, new_name, plot_data.variable
+        )
 
     x_range = plot_data.variable.unique().tolist()
 
     TOOLS = "hover,crosshair,pan,wheel_zoom,zoom_in,zoom_out,box_zoom,undo,redo,reset,tap,box_select,poly_select,lasso_select,save"
 
-    player_name = player.replace('..', ' ').replace('.', ' ')
+    player_name = player.replace("..", " ").replace(".", " ")
 
-    title_text = f'{player_name} {season} 5v5 LINE COMBINATIONS & PERFORMANCE'
+    title_text = f"{player_name} {season} 5v5 LINE COMBINATIONS & PERFORMANCE"
 
-    if size_col != 'EVENLY SIZED':
-
-        title_text = title_text + f' (SIZED FOR {size_col})'
+    if size_col != "EVENLY SIZED":
+        title_text = title_text + f" (SIZED FOR {size_col})"
 
     p = figure(
         x_range=list(xtick_labels.values()),
@@ -147,12 +163,10 @@ def zscore_jitter(lines, player, team, season, toi_min, size_col):
         tooltips_name = "background"
         tools = ""
 
-        if size_col == 'EVENLY SIZED':
-
+        if size_col == "EVENLY SIZED":
             size = 13
 
-        elif size_col == 'TIME-ON-ICE':
-
+        elif size_col == "TIME-ON-ICE":
             size = "size_col"
 
         if color == colors["GOAL"] or color == colors["SHOT"]:
@@ -203,7 +217,6 @@ def zscore_jitter(lines, player, team, season, toi_min, size_col):
                 radius_units="screen",
             )
 
-
     hover = p.select(dict(type=HoverTool))
     hover.tooltips = [
         ("LINE", "@forwards"),
@@ -222,12 +235,22 @@ def zscore_jitter(lines, player, team, season, toi_min, size_col):
 
     hover.renderers = [special_lines, other_lines]
 
-    p.yaxis.axis_label = 'Z-SCORE'
+    p.yaxis.axis_label = "Z-SCORE"
 
     return p
 
-def lines_scatter(lines, x_values, y_values, size_values, size_multiplier, player, team, season, toi_min):
 
+def lines_scatter(
+    lines,
+    x_values,
+    y_values,
+    size_values,
+    size_multiplier,
+    player,
+    team,
+    season,
+    toi_min,
+):
     sessions = ["R"]
 
     conds = np.logical_and.reduce(
@@ -241,11 +264,12 @@ def lines_scatter(lines, x_values, y_values, size_values, size_multiplier, playe
         lines.loc[conds].sort_values(by="toi", ascending=False).reset_index(drop=True)
     )
 
-    if size_values != 'EVENLY SIZED':
-
-        plot_data["size_col"] = (plot_data[size_values] - plot_data[size_values].min()) / (
-            plot_data[size_values].max() - plot_data[size_values].min()
-        ) * size_multiplier
+    if size_values != "EVENLY SIZED":
+        plot_data["size_col"] = (
+            (plot_data[size_values] - plot_data[size_values].min())
+            / (plot_data[size_values].max() - plot_data[size_values].min())
+            * size_multiplier
+        )
 
     colors = NHL_COLORS[team]
 
@@ -254,8 +278,12 @@ def lines_scatter(lines, x_values, y_values, size_values, size_multiplier, playe
     )
 
     conds = [
-        np.logical_and(plot_data.team != team, ~plot_data.forwards_id.str.contains(player)),
-        np.logical_and(plot_data.team == team, ~plot_data.forwards_id.str.contains(player)),
+        np.logical_and(
+            plot_data.team != team, ~plot_data.forwards_id.str.contains(player)
+        ),
+        np.logical_and(
+            plot_data.team == team, ~plot_data.forwards_id.str.contains(player)
+        ),
         plot_data.forwards_id.str.contains(player),
     ]
 
@@ -265,21 +293,18 @@ def lines_scatter(lines, x_values, y_values, size_values, size_multiplier, playe
 
     TOOLS = "hover,crosshair,pan,wheel_zoom,zoom_in,zoom_out,box_zoom,undo,redo,reset,tap,box_select,poly_select,lasso_select,save"
 
-    player_name = player.replace('..', ' ').replace('.', ' ')
+    player_name = player.replace("..", " ").replace(".", " ")
 
-    title_text = f'{player_name} {season} 5v5 LINE COMBINATIONS & PERFORMANCE'
+    title_text = f"{player_name} {season} 5v5 LINE COMBINATIONS & PERFORMANCE"
 
-    if x_values == 'gf_perc':
-
+    if x_values == "gf_perc":
         plot_data[x_values].fillna(0)
 
-    if y_values == 'gf_perc':
-
+    if y_values == "gf_perc":
         plot_data[y_values].fillna(0)
 
-    if size_values != 'EVENLY SIZED':
-
-        title_text = title_text + f' (SIZED FOR {label_dict[size_values]})'
+    if size_values != "EVENLY SIZED":
+        title_text = title_text + f" (SIZED FOR {label_dict[size_values]})"
 
     p = figure(
         sizing_mode="stretch_both",
@@ -304,13 +329,11 @@ def lines_scatter(lines, x_values, y_values, size_values, size_multiplier, playe
         tooltips_name = "background"
         tools = ""
 
-        if size_values == 'EVENLY SIZED':
-
+        if size_values == "EVENLY SIZED":
             size = 13
 
         else:
-
-            size = 'size_col'
+            size = "size_col"
 
         if color == colors["GOAL"] or color == colors["SHOT"]:
             alpha = 0.75
@@ -360,7 +383,6 @@ def lines_scatter(lines, x_values, y_values, size_values, size_multiplier, playe
                 radius_units="screen",
             )
 
-
     hover = p.select(dict(type=HoverTool))
     hover.tooltips = [
         ("LINE", "@forwards"),
@@ -383,15 +405,29 @@ def lines_scatter(lines, x_values, y_values, size_values, size_multiplier, playe
 
     p.xaxis.axis_label = label_dict[x_values]
 
-    x_avg, y_avg = get_averages(plot_data, x_values, y_values, team, level = 'NHL')
+    x_avg, y_avg = get_averages(plot_data, x_values, y_values, team, level="NHL")
 
-    plot_colors = {'dark_gray': '#36454F',
-                       'light_gray': '#D3D3D3',
-                       'medium_gray': '#808080'}
+    plot_colors = {
+        "dark_gray": "#36454F",
+        "light_gray": "#D3D3D3",
+        "medium_gray": "#808080",
+    }
 
-    vline = Span(location=x_avg, dimension='height', line_color=plot_colors['light_gray'], line_width=2, level = 'underlay')
+    vline = Span(
+        location=x_avg,
+        dimension="height",
+        line_color=plot_colors["light_gray"],
+        line_width=2,
+        level="underlay",
+    )
     # Horizontal line
-    hline = Span(location=y_avg, dimension='width', line_color=plot_colors['light_gray'], line_width=2, level = 'underlay')
+    hline = Span(
+        location=y_avg,
+        dimension="width",
+        line_color=plot_colors["light_gray"],
+        line_width=2,
+        level="underlay",
+    )
 
     p.add_layout(vline)
     p.add_layout(hline)

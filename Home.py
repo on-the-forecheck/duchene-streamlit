@@ -3,10 +3,7 @@ from PIL import Image
 
 favicon = Image.open("./assets/otf_logo.png")
 
-st.set_page_config(
-    page_title="Facts about Matt Duchene",
-    page_icon=favicon
-)
+st.set_page_config(page_title="Facts about Matt Duchene", page_icon=favicon)
 
 st.write(f"# Facts about Matt Duchene")
 
