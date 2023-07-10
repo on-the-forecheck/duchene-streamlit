@@ -67,7 +67,7 @@ with st.spinner("Downloading list of players from database..."):
     players = get_players(seasons, team)
 
 with st.sidebar:
-    player = st.multiselect(players_label, players, default='MATT.DUCHENE')
+    players = st.multiselect(players_label, players, default='MATT.DUCHENE')
 
     toi_min = st.slider(
         "SELECT TIME-ON-ICE THRESHOLD", min_value=None, max_value=None, value=30, step=1
@@ -78,7 +78,6 @@ opposition = False
 
 with st.spinner("Downloading data from database..."):
 
-    players = [player]
     season_stats = stats_sql(
         years=seasons,
         level="game",
