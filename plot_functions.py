@@ -19,7 +19,12 @@ from bokeh.layouts import gridplot, column
 
 import sys
 sys.path.append("duchene-streamlit")
-from info import NHL_COLORS, team_codes
+from info import NHL_COLORS, team_codes, label_dict
+from helper_functions import (calc_per60, calc_zones, calc_percentages, calc_pims, get_averages, prep_lines)
+
+plot_colors = {'dark_gray': '#36454F',
+                       'light_gray': '#D3D3D3',
+                       'medium_gray': '#808080'}
 
 def zscore_jitter(lines, player, team, season, toi_min, size_col):
 
@@ -120,7 +125,6 @@ def zscore_jitter(lines, player, team, season, toi_min, size_col):
         title_text = title_text + f' (SIZED FOR {size_col})'
 
     p = figure(
-        height=400,
         x_range=list(xtick_labels.values()),
         sizing_mode="stretch_both",
         title=title_text,
@@ -219,5 +223,177 @@ def zscore_jitter(lines, player, team, season, toi_min, size_col):
     hover.renderers = [special_lines, other_lines]
 
     p.yaxis.axis_label = 'Z-SCORE'
+
+    return p
+
+def lines_scatter(lines, x_values, y_values, size_values, size_multiplier, player, team, season, toi_min):
+
+    sessions = ["R"]
+
+    conds = np.logical_and.reduce(
+        [
+            lines.toi_min >= toi_min,
+            lines.session.isin(sessions),
+        ]
+    )
+
+    plot_data = (
+        lines.loc[conds].sort_values(by="toi", ascending=False).reset_index(drop=True)
+    )
+
+    if size_values != 'EVENLY SIZED':
+
+        plot_data["size_col"] = (plot_data[size_values] - plot_data[size_values].min()) / (
+            plot_data[size_values].max() - plot_data[size_values].min()
+        ) * size_multiplier
+
+    colors = NHL_COLORS[team]
+
+    plot_data["edgecolors"] = np.where(
+        plot_data.forwards_id.str.contains(player), colors["SHOT"], "white"
+    )
+
+    conds = [
+        np.logical_and(plot_data.team != team, ~plot_data.forwards_id.str.contains(player)),
+        np.logical_and(plot_data.team == team, ~plot_data.forwards_id.str.contains(player)),
+        plot_data.forwards_id.str.contains(player),
+    ]
+
+    values = [colors["MISS"], colors["SHOT"], colors["GOAL"]]
+
+    plot_data["colors"] = np.select(conds, values)
+
+    TOOLS = "hover,crosshair,pan,wheel_zoom,zoom_in,zoom_out,box_zoom,undo,redo,reset,tap,box_select,poly_select,lasso_select,save"
+
+    player_name = player.replace('..', ' ').replace('.', ' ')
+
+    title_text = f'{player_name} {season} 5v5 LINE COMBINATIONS & PERFORMANCE'
+
+    if x_values == 'gf_perc':
+
+        plot_data[x_values].fillna(0)
+
+    if y_values == 'gf_perc':
+
+        plot_data[y_values].fillna(0)
+
+    if size_values != 'EVENLY SIZED':
+
+        title_text = title_text + f' (SIZED FOR {label_dict[size_values]})'
+
+    p = figure(
+        sizing_mode="stretch_both",
+        title=title_text,
+        tools=TOOLS,
+    )
+
+    p.xgrid.grid_line_color = None
+    p.ygrid.grid_line_color = None
+
+    source = ColumnDataSource(plot_data)
+
+    plot_colors = [colors["MISS"], colors["SHOT"], colors["GOAL"]]
+
+    for color in plot_colors:
+        filters = [True if x == color else False for x in source.data["colors"]]
+
+        view = CDSView(source=source, filters=[BooleanFilter(filters)])
+
+        alpha = 0.35
+        line_width = 2
+        tooltips_name = "background"
+        tools = ""
+
+        if size_values == 'EVENLY SIZED':
+
+            size = 13
+
+        else:
+
+            size = 'size_col'
+
+        if color == colors["GOAL"] or color == colors["SHOT"]:
+            alpha = 0.75
+            line_width = 2
+            tooltips_name = "main"
+            tools = "hover"
+
+        if color == colors["GOAL"]:
+            special_lines = p.circle(
+                x_values,
+                y_values,
+                source=source,
+                view=view,
+                alpha=alpha,
+                size=size,
+                line_color="edgecolors",
+                line_width=line_width,
+                color="colors",
+                radius_units="screen",
+            )
+        elif color == colors["SHOT"]:
+            other_lines = p.circle(
+                x_values,
+                y_values,
+                source=source,
+                view=view,
+                alpha=alpha,
+                size=size,
+                line_color="edgecolors",
+                line_width=line_width,
+                color="colors",
+                radius_units="screen",
+            )
+
+        else:
+            p.circle(
+                x_values,
+                y_values,
+                source=source,
+                view=view,
+                alpha=alpha,
+                size=size,
+                line_color="edgecolors",
+                line_width=2,
+                color="colors",
+                name=tooltips_name,
+                radius_units="screen",
+            )
+
+
+    hover = p.select(dict(type=HoverTool))
+    hover.tooltips = [
+        ("LINE", "@forwards"),
+        ("TEAM", "@team"),
+        ("TOI", "@toi_min{0.0}"),
+        ("OZF%", "@ozf_perc{0.0%}"),
+        ("xGF / 60", "@xgf_p60{0.0}"),
+        ("xGA / 60", "@xga_p60{0.0}"),
+        ("GF / 60", "@gf_p60"),
+        ("GA / 60", "@ga_p60"),
+        ("CF / 60", "@cf_p60"),
+        ("CA / 60", "@ca_p60"),
+    ]
+
+    hover.mode = "mouse"
+
+    hover.renderers = [special_lines, other_lines]
+
+    p.yaxis.axis_label = label_dict[y_values]
+
+    p.xaxis.axis_label = label_dict[x_values]
+
+    x_avg, y_avg = get_averages(plot_data, x_values, y_values, team, level = 'NHL')
+
+    plot_colors = {'dark_gray': '#36454F',
+                       'light_gray': '#D3D3D3',
+                       'medium_gray': '#808080'}
+
+    vline = Span(location=x_avg, dimension='height', line_color=plot_colors['light_gray'], line_width=2, level = 'underlay')
+    # Horizontal line
+    hline = Span(location=y_avg, dimension='width', line_color=plot_colors['light_gray'], line_width=2, level = 'underlay')
+
+    p.add_layout(vline)
+    p.add_layout(hline)
 
     return p
