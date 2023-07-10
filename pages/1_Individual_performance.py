@@ -50,7 +50,7 @@ teams_label = "SELECT TEAM"
 
 strength_label = "SELECT STRENGTH STATE"
 
-strengths_list = ["5v5"]
+strengths_list = ["5v5", '5v4', '5v3', '4v3']
 
 players_label = "SELECT PLAYER"
 
@@ -61,7 +61,7 @@ with st.sidebar:
 
     team = st.selectbox(teams_label, list(NHL_COLORS.keys()), index=18)
 
-    strength_states = st.multiselect(strength_label, strengths_list, default="5v5")
+    strength_states = st.multiselect(strength_label, strengths_list, default=strengths_list)
 
 with st.spinner("Downloading list of players from database..."):
     players = get_players(seasons, team)
@@ -81,7 +81,7 @@ with st.spinner("Downloading data from database..."):
     players = [player]
     season_stats = stats_sql(
         years=seasons,
-        level="season",
+        level="game",
         strengths=strength_states,
         players=players,
         teammates=teammates,
@@ -91,7 +91,8 @@ with st.spinner("Downloading data from database..."):
     pbp = pbp_sql(
         seasons,
         events = 'shots',
-        player = player,
+        player = players,
+        strengths = strength_states,
         teammates=teammates,
         opposition=opposition,
     )

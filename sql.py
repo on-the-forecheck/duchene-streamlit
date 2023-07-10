@@ -49,7 +49,7 @@ def get_players(years, team):
 
 ## Read pbp functions
 @st.cache_data(ttl=600, show_spinner=False)
-def pbp_sql(years, events=None, player = False, teammates=True, opposition=True, engine=engine):
+def pbp_sql(years, events=None, players = [], strengths = ['5v5'], teammates=True, opposition=True, engine=engine):
     """
     Function to read pbp data from my SQL database
     Can be either current or historical stats
@@ -218,12 +218,13 @@ def pbp_sql(years, events=None, player = False, teammates=True, opposition=True,
         else:
             table = "current_pbp"
 
-        if player == False:
+        if players == []:
 
             sql_str = f"""SELECT {', '.join(cols)},
                             {', '.join(stats)}
                             FROM {table}
                             WHERE season = {year}{year + 1}
+                            AND strength_state IN ({', '.join(f"'{strength}'" for strength in strengths)})
                             AND event_type IN {str(events).replace('[', '(').replace(']', ')')}
                             ORDER BY game_date, game_id, event_index"""
 
@@ -233,6 +234,7 @@ def pbp_sql(years, events=None, player = False, teammates=True, opposition=True,
                             {', '.join(stats)}
                             FROM {table}
                             WHERE season = {year}{year + 1}
+                            AND strength_state IN ({', '.join(f"'{strength}'" for strength in strengths)})
                             AND event_player_1 = '{player}'
                             AND event_type IN {str(events).replace('[', '(').replace(']', ')')}
                             ORDER BY game_date, game_id, event_index"""
