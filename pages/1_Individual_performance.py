@@ -57,7 +57,7 @@ players_label = "SELECT PLAYER"
 with st.sidebar:
     years = list(range(2022, 2006, -1))
 
-    seasons = st.multiselect(seasons_label, years, default=years[:5])
+    seasons = st.multiselect(seasons_label, years, default=years)
 
     team = st.selectbox(teams_label, list(NHL_COLORS.keys()), index=18)
 
