@@ -235,7 +235,7 @@ def pbp_sql(years, events=None, players = [], strengths = ['5v5'], teammates=Tru
                             FROM {table}
                             WHERE season = {year}{year + 1}
                             AND strength_state IN ({', '.join(f"'{strength}'" for strength in strengths)})
-                            AND event_player_1 = '{player}'
+                            AND event_player_1 IN ({', '.join(f"'{player}'" for player in players)})
                             AND event_type IN {str(events).replace('[', '(').replace(']', ')')}
                             ORDER BY game_date, game_id, event_index"""
 
