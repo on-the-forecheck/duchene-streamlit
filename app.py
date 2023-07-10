@@ -184,7 +184,7 @@ with st.spinner("Downloading list of players from database..."):
 	players = get_players(seasons, team)
 
 with st.sidebar:
-    player = st.selectbox(players_label, players, index=0)
+    player = st.selectbox(players_label, players, index=11)
 
     toi_min = st.slider(
         "SELECT TIME-ON-ICE THRESHOLD", min_value=None, max_value=None, value=30, step=1
@@ -346,7 +346,7 @@ p = figure(
     height=400,
     x_range=list(xtick_labels.values()),
     sizing_mode="stretch_both",
-    title=f'{player} 5v5 LINE COMBINATIONS & PERFROMANCE',
+    title=f'{player} 5v5 LINE COMBINATIONS & PERFORMANCE',
     tools=TOOLS,
 )
 
