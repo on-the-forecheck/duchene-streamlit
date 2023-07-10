@@ -342,11 +342,19 @@ x_range = plot_data.variable.unique().tolist()
 
 TOOLS = "hover,crosshair,pan,wheel_zoom,zoom_in,zoom_out,box_zoom,undo,redo,reset,tap,box_select,poly_select,lasso_select,save"
 
+player_name = player.replace('..', ' ').replace('.', ' ')
+
+title_text = f'{player} {season} 5v5 LINE COMBINATIONS & PERFORMANCE'
+
+if size_col != 'EVENLY SIZED':
+
+	title_text = title_text + f' (SIZED FOR {size_col})'
+
 p = figure(
     height=400,
     x_range=list(xtick_labels.values()),
     sizing_mode="stretch_both",
-    title=f'{player} 5v5 LINE COMBINATIONS & PERFORMANCE',
+    title=title_text,
     tools=TOOLS,
 )
 
