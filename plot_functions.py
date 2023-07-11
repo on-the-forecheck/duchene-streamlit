@@ -442,7 +442,13 @@ def gsax_lines(pbp, player, team, strengths):
 
     player_name = player.replace('..', ' ').replace('.', ' ')
 
-    p = figure(title=f"{player_name} CAREER SCORING", x_axis_label='CUMULATIVE SHOTS TAKEN', y_axis_label='CUMULATIVE GOALS SCORED ABOVE EXPECTED')
+    TOOLS = "hover,crosshair,pan,wheel_zoom,zoom_in,zoom_out,box_zoom,undo,redo,reset,tap,box_select,poly_select,lasso_select,save"
+
+    p = figure(title=f"{player_name} CAREER SCORING",
+        x_axis_label='CUMULATIVE SHOTS TAKEN',
+        y_axis_label='CUMULATIVE GOALS SCORED ABOVE EXPECTED',
+        tools = TOOLS,
+        )
 
     plot_data = df.loc[np.logical_and(df.strength_state.isin(strengths), df.event_player_1 == player)]
 
@@ -468,7 +474,21 @@ def gsax_lines(pbp, player, team, strengths):
 
         p.line('cum_shots', 'cum_gsax', color = color, legend_label = strength, source = source, line_width=4)
 
+        hover = p.select(dict(type=HoverTool))
+        hover.tooltips = [
+            ("LINE", "@forwards"),
+            ("TEAM", "@team"),
+            ("TOI", "@toi_min{0.0}"),
+            ("OZF%", "@ozf_perc{0.0%}"),
+            ("xGF / 60", "@xgf_p60{0.0}"),
+            ("xGA / 60", "@xga_p60{0.0}"),
+            ("GF / 60", "@gf_p60"),
+            ("GA / 60", "@ga_p60"),
+            ("CF / 60", "@cf_p60"),
+            ("CA / 60", "@ca_p60"),
+        ]
 
+    hover.mode = "mouse"
 
     return p
 
