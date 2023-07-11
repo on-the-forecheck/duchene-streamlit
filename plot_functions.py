@@ -476,6 +476,7 @@ def gsax_lines(pbp, player, team, strengths):
 
         hover = p.select(dict(type=HoverTool))
         hover.tooltips = [
+            ("SEASON", "@season"),
             ("PLAYER", "@event_player_1"),
             ("TEAM", "@event_team"),
             ("OPP TEAM", "@opp_team"),
