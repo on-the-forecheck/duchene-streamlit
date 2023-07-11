@@ -40,7 +40,7 @@ from helper_functions import (
     prep_pbp,
     prep_stats
 )
-from plot_functions import zscore_jitter, lines_scatter
+from plot_functions import zscore_jitter, lines_scatter, gsax_lines
 
 st.markdown("# Individual Career Performance")
 st.sidebar.header("Individual performance")
@@ -52,7 +52,7 @@ teams_label = "SELECT TEAM"
 
 strength_label = "SELECT STRENGTH STATE"
 
-strengths_list = ["5v5", '5v4', '5v3', '4v3']
+strengths_list = ["5v5", 'POWERPLAY', 'EVEN STRENGTH', 'PENALTY KILL']
 
 players_label = "SELECT PLAYER"
 
@@ -63,7 +63,7 @@ with st.sidebar:
 
     team = st.selectbox(teams_label, list(NHL_COLORS.keys()), index=18)
 
-    strength_states = st.multiselect(strength_label, strengths_list, default=strengths_list)
+    strengths = st.multiselect(strength_label, strengths_list, default=['5v5', 'POWERPLAY'])
 
 with st.spinner("Downloading list of players from database..."):
     players = get_players(seasons, team)
@@ -77,6 +77,28 @@ with st.sidebar:
 
 teammates = False
 opposition = False
+
+strength_states = []
+
+if '5v5' in strengths:
+
+    strength_states.append('5v5')
+
+if 'POWERPLAY' in strengths:
+
+    strength_states.extend(['5v4', '5v3', '4v3'])
+
+if 'EVEN STRENGTH' in strengths:
+
+    strength_states.extend(['4v4', '3v3'])
+
+    if '5v5' not in strength_states:
+
+        strength_states.insert(0, '5v5')
+
+if 'PENALTY KILL' in strengths:
+
+    strength_states.extend(['4v5', '3v5', '3v4'])
 
 with st.spinner("Downloading data from database..."):
 
@@ -102,8 +124,19 @@ with st.spinner("Downloading data from database..."):
 
 game_stats = prep_stats(game_stats)
 
-pbp = prep_pbp(pbp)
+pbp = prep_pbp(pbp, view = 'career')
 
-st.dataframe(pbp)
+with st.container():
 
-st.dataframe(game_stats)
+    col1, col2 = st.columns(2)
+
+    with col1:
+        player = st.selectbox("SELECT PLAYER", players, index=0)
+
+    with col2:
+        strengths_plot = st.multiselect("SELECT STRENGTHS", strengths, default=strengths)
+
+    # create a new plot with a title and axis labels
+    p = gsax_lines(pbp, player, team, strengths_plot)
+
+    st.bokeh_chart(p, use_container_width=True)

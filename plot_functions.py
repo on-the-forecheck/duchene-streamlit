@@ -433,3 +433,46 @@ def lines_scatter(
     p.add_layout(hline)
 
     return p
+
+
+
+def gsax_lines(pbp, player, team, strengths):
+
+    df = pbp.copy()
+
+    player_name = player.replace('..', ' ').replace('.', ' ')
+
+    p = figure(title=f"{player_name} CAREER SCORING", x_axis_label='CUMULATIVE SHOTS TAKEN', y_axis_label='CUMULATIVE GOALS SCORED ABOVE EXPECTED')
+
+    plot_data = df.loc[np.logical_and(df.strength_state.isin(strengths), df.event_player_1 == player)]
+
+    colors = NHL_COLORS[team]
+
+    conds = [plot_data.strength_state == '5v5', plot_data.strength_state == 'POWERPLAY']
+
+    values = [colors['GOAL'], colors['SHOT']]
+
+    plot_data['colors'] = np.select(conds, values, colors['MISS'])
+
+    for strength in strengths:
+
+        if strength == '5v5':
+
+            color = colors['GOAL']
+
+        if strength == 'POWERPLAY':
+
+            color = colors['SHOT']
+
+        source = ColumnDataSource(plot_data.loc[plot_data.colors == color])
+
+        p.line('cum_shots', 'cum_gsax', color = color, legend_label = strength, source = source, line_width=4)
+
+
+
+    return p
+
+
+
+
+

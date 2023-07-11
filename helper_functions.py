@@ -198,7 +198,7 @@ def get_averages(data, x_values, y_values, team, weights="toi_min", level="NHL")
     return x_avg, y_avg
 
 
-def prep_pbp(pbp):
+def prep_pbp(pbp, view = 'career'):
 
     df = pbp.copy()
 
@@ -217,6 +217,20 @@ def prep_pbp(pbp):
     sort_cols = ['game_date', 'event_index']
 
     df = df.sort_values(by = sort_cols).reset_index(drop = True)
+
+    if view == 'career':
+
+        group_list = ['session', 'event_player_1', 'event_player_1_id', 'strength_state']
+
+    elif view == 'season':
+
+        group_list = ['season', 'session', 'player', 'player_id', 'strength_state']
+
+    df['gsax'] = df.goal.fillna(0) - df.pred_goal.fillna(0)
+
+    df['cum_shots'] = df.groupby(group_list).shot.cumcount() + 1
+
+    df['cum_gsax'] = df.groupby(group_list).gsax.cumsum()
 
     return df
 
