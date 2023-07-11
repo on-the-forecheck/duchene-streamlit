@@ -450,7 +450,7 @@ def gsax_lines(pbp, player, team, strengths):
         tools = TOOLS,
         )
 
-    plot_data = df.loc[np.logical_and(df.strength_state.isin(strengths), df.event_player_1 == player)]
+    plot_data = df.loc[np.logical_and(df.strength_state.isin(strengths), df.event_player_1 == player)].copy()
 
     colors = NHL_COLORS[team]
 
