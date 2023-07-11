@@ -479,7 +479,7 @@ def gsax_lines(pbp, player, team, strengths):
             ("PLAYER", "@event_player_1"),
             ("TEAM", "@event_team"),
             ("OPP TEAM", "@opp_team"),
-            ("OPP GOALIE", "@opp_goalie"),
+            ("OPP GOALIE", "@opp_on_g"),
             ("xG", "@pred_goal{0.0}"),
             ("GSaX", "@gsax"),
         ]
