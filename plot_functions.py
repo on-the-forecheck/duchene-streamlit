@@ -476,16 +476,12 @@ def gsax_lines(pbp, player, team, strengths):
 
         hover = p.select(dict(type=HoverTool))
         hover.tooltips = [
-            ("LINE", "@forwards"),
-            ("TEAM", "@team"),
-            ("TOI", "@toi_min{0.0}"),
-            ("OZF%", "@ozf_perc{0.0%}"),
-            ("xGF / 60", "@xgf_p60{0.0}"),
-            ("xGA / 60", "@xga_p60{0.0}"),
-            ("GF / 60", "@gf_p60"),
-            ("GA / 60", "@ga_p60"),
-            ("CF / 60", "@cf_p60"),
-            ("CA / 60", "@ca_p60"),
+            ("PLAYER", "@event_player_1"),
+            ("TEAM", "@event_team"),
+            ("OPP TEAM", "@opp_team"),
+            ("OPP GOALIE", "@opp_goalie"),
+            ("xG", "@pred_goal{0.0}"),
+            ("GSaX", "@gsax"),
         ]
 
     hover.mode = "mouse"
